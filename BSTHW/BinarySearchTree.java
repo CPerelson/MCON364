@@ -95,7 +95,7 @@ public class BinarySearchTree<T extends Comparable<T>> implements BSTInterface<T
         return counter;
     }
 
-    public Iterator<T> getIterator(BSTInterface.Traversal orderType) {
+    public Iterator<T> getIterator(Traversal orderType) {
         System.out.println("Creating an iterator for traversing the binar search tree");
 
         final LinkedQueue<T> infoQueue = new LinkedQueue();
@@ -198,13 +198,13 @@ public class BinarySearchTree<T extends Comparable<T>> implements BSTInterface<T
         }
     }
 
-    public String depthFirstSearch() {
-        BSTNode<T> node;
+    public void depthFirstSearch() {
+        BSTNode<T> node = null;
         if (node != null) {
             Stack<BSTNode<T>> stack = new Stack<>();
             stack.push(node);
             while (!stack.isEmpty()) {
-                BSTNode<T> node = stack.pop();
+                node = stack.pop();
                 System.out.println(node.getInfo());
                 if (node.getRight() != null) {
                     stack.push(node.getRight());
@@ -214,27 +214,14 @@ public class BinarySearchTree<T extends Comparable<T>> implements BSTInterface<T
                 }
             }
         }
+    }
 
-        public String toString () {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("Binary search tree: \n");
-            if (root != null) {
-                Queue<BSTNode<T>> queue = new LinkedList<>();
-                queue.add(root);
-                while (!queue.isEmpty()) {
-                    BSTNode<T> node = queue.poll();
-                    stringBuilder.append(node.getInfo()).append(" ");
-                    if (node.getLeft() != null) {
-                        queue.add(node.getLeft());
-                    }
-                    if (node.getRight() != null) {
-                        queue.add(node.getRight());
-                    }
-                }
-            }
-            return stringBuilder.toString();
-        }
-
+    @Override
+    public String toString() {
+        return "BinarySearchTree{" +
+                "root=" + root +
+                ", counter=" + counter +
+                '}';
     }
 }
 
