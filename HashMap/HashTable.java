@@ -79,7 +79,8 @@ public class HashTable<K, V> implements MapInterface<K, V>, Iterable<MapEntry<K,
     }
 
     private int sophisticatedHash(K key) {
-        //implement sophisticated hash here double hash function
+
+        return 0;
     }
 
     private int naiveHash(K key) {
@@ -146,20 +147,22 @@ public class HashTable<K, V> implements MapInterface<K, V>, Iterable<MapEntry<K,
         if (k == null)
             throw new IllegalArgumentException("Maps do not allow null keys.");
         MapEntry<K, V> entry = new MapEntry<K, V>(k, v);
-        MapEntry<K,V> temp;
-        Iterator<MapEntry<K,V>> search = table.iterator(); // Arraylist iterator
-        while (search.hasNext())
-        {
-            temp = search.next();
-            if (temp.getKey().equals(k))
-            {
-                search.remove();
-                table.add(entry);
-                return temp.alue(); // k found, exits method
+
+        for(int i =0; i<TABLE_SIZE; i++){
+            MapEntry<K,V> temp = table[i];
+            if (temp!= null && temp.getKey().equals(k)){
+                table[i] = entry;//replace the existing entry
+                return temp.getValue(); //return the original value
             }
         }
-        // No entry is associated with k.
-        table.add(entry);
+
+        //no entry is associated with k, add the new entry to the table
+        for (int i =0; i<TABLE_SIZE; i++){
+            if (table[i] == null){
+                table[i] = entry;
+                break;
+            }
+        }
         return null;
     }
 
