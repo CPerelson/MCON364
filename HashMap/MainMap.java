@@ -1,39 +1,13 @@
 package Maps;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.*;
 
 public class MainMap {
     public static void main(String[] args) {
-        //read the book file
-        File filePath = new File("Oliver_Twist.txt");
-        //create a hash table to store word counts. Initialize the hashtable with a an amount
-        HashTable<String, Integer> hashTable = new HashTable<>(50);
-        Scanner fileReader = null;
-        try {
-            fileReader = new Scanner(filePath);
-            while (fileReader.hasNext()) {
-                //iterate through each word and populate the hash table
-                // Convert word to lowercase and remove punctuation
-                String word = fileReader.next().toLowerCase().replaceAll("[^a-zA-Z]", "");
-
-
-                //check if the word is already in the hashtable
-                if (hashTable.contains(word)&& hashTable.get(word)!=null) {
-                    //if present in the hashtable update the count
-                    int currentCount = hashTable.get(word);
-                    hashTable.put(word, currentCount + 1);
-                } else {
-                    //if not in hashtable insert word with count 1
-                    hashTable.put(word, 1);
-                }
-            }
-
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        String filePath = "Oliver_Twist.txt";
+        //create a hash table to store word counts. Initialize the hashtable with an amount
+        HashTable<String, Integer> hashTable = new HashTable<>(50, filePath);
+        hashTable.populateHashTable("Oliver_Twist.txt", hashTable);
         Scanner scanner = new Scanner(System.in);
         System.out.println("Choose the hash function level: ");
         System.out.println("1. Naive");
@@ -42,17 +16,17 @@ public class MainMap {
         HashFunctionLevel level = (choice == 1) ? HashFunctionLevel.NAIVE : HashFunctionLevel.SOPHISTICATED;
         hashTable.setHashFunctionLevel(level);
 
-        asciiHashCode(hashTable);
+        //asciiHashCode(hashTable);
         char ch;
         do {
-            menu(scanner);
+            menu();
             menuChoice(scanner, hashTable);
             System.out.println("Do you want to continue (Type y or n)\n");
             ch = scanner.next().charAt(0);
         } while (ch == 'Y' || ch == 'y');
 
     }
-
+/**
     private static void asciiHashCode(HashTable<String, Integer> hashTable) {
         hashTable.put("a", 97);
         hashTable.put("b", 98);
@@ -80,9 +54,9 @@ public class MainMap {
         hashTable.put("x", 120);
         hashTable.put("y", 121);
         hashTable.put("z", 122);
-    }
+    }**/
 
-    private static void menu(Scanner scanner) {
+    private static void menu() {
         System.out.println("Choose an option from the menu\n");
         System.out.println("1. View word count and linked list length for a word");
         System.out.println("2. View words in descending order according to word count");
@@ -117,10 +91,11 @@ public class MainMap {
             int count = hashTable.get(word);
             int hash = hashTable.myhash(word);
             //implement the logic to get the length of the linked list for hte given word
-            int linkedListLength = 0; //replace this with the actual linked list length
+            int linkedListLength = 1; //start with 1 for the first entry
             MapEntry<String, Integer> entry = hashTable.table[hash];
-            while (entry != null) {
+            while (entry.next != null) {
                 linkedListLength++;
+                entry = entry.next;
                 if (entry.getKey().equals(word)) {
                     break;
                 }
@@ -136,13 +111,12 @@ public class MainMap {
         System.out.println("Words in descending order of usage:");
         // Create a list of map entries
         List<MapEntry<String, Integer>> entries = new ArrayList<>();
-        Iterator<MapEntry<String, Integer>> iterator = hashTable.iterator();
-        while (iterator.hasNext()) {
-            entries.add(iterator.next());
+        for (MapEntry<String, Integer> stringIntegerMapEntry : hashTable) {
+            entries.add(stringIntegerMapEntry);
         }
 
         // Sort the entries by value (word counts) in descending order
-        Collections.sort(entries, (entry1, entry2)-> Integer.compare(entry2.getValue(), entry1.getValue()));
+        entries.sort((entry1, entry2) -> Integer.compare(entry2.getValue(), entry1.getValue()));
 
         //print words and their count in descending order
         for (MapEntry<String, Integer> entry: entries){
