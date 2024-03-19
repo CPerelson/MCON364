@@ -10,15 +10,17 @@ public class MainMap {
         File filePath = new File("Oliver_Twist.txt");
         //create a hash table to store word counts. Initialize the hashtable with a an amount
         HashTable<String, Integer> hashTable = new HashTable<>(50);
-        Scanner scanner = null;
+        Scanner fileReader = null;
         try {
-            scanner = new Scanner(filePath);
-            while (scanner.hasNext()) {
+            fileReader = new Scanner(filePath);
+            while (fileReader.hasNext()) {
                 //iterate through each word and populate the hash table
                 // Convert word to lowercase and remove punctuation
-                String word = scanner.next().toLowerCase().replaceAll("[^a-zA-Z]", "");
+                String word = fileReader.next().toLowerCase().replaceAll("[^a-zA-Z]", "");
+
+
                 //check if the word is already in the hashtable
-                if (hashTable.contains(word)) {
+                if (hashTable.contains(word)&& hashTable.get(word)!=null) {
                     //if present in the hashtable update the count
                     int currentCount = hashTable.get(word);
                     hashTable.put(word, currentCount + 1);
@@ -28,11 +30,11 @@ public class MainMap {
                 }
             }
 
-            scanner.close();
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
+        Scanner scanner = new Scanner(System.in);
         System.out.println("Choose the hash function level: ");
         System.out.println("1. Naive");
         System.out.println("2. Sophisticated");
@@ -111,7 +113,7 @@ public class MainMap {
     private static void wordCountAndLinkedListLength(Scanner scanner, HashTable<String, Integer> hashTable) {
         System.out.println("Enter a word: ");
         String word = scanner.next().toLowerCase();
-        if (hashTable.contains(word)) {
+        if (hashTable.contains(word)&& hashTable.get(word)!=null) {
             int count = hashTable.get(word);
             int hash = hashTable.myhash(word);
             //implement the logic to get the length of the linked list for hte given word
