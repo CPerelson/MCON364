@@ -1,7 +1,10 @@
 package Maps;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 public class HashTable<K, V> implements MapInterface<K, V>, Iterable<MapEntry<K, V>>{
     public int TABLE_SIZE;
@@ -9,13 +12,38 @@ public class HashTable<K, V> implements MapInterface<K, V>, Iterable<MapEntry<K,
     public MapEntry<K, V>[] table;
     private HashFunctionLevel hashFunctionLevel;
 
-    public HashTable(int ts) {
+    public HashTable(int ts, String filePath) {
         this.TABLE_SIZE = ts;
         this.size = 0;
         this.hashFunctionLevel = HashFunctionLevel.NAIVE;//initiate to naive by default
         table = new MapEntry[TABLE_SIZE];
         for (int i = 0; i<TABLE_SIZE; i++){
             table[i]=null;
+        }
+        populateHashTable(filePath, table); //call the new method to populate the hash table
+    }
+
+    public void populateHashTable(String filePath, HashTable<String, Integer> hashTable) {
+        Scanner fileReader = null;
+        try {
+            File file = new File(filePath);
+            fileReader = new Scanner(file);
+            while (fileReader.hasNext()) {
+                String word = fileReader.next().toLowerCase().replaceAll("[^a-zA-Z]", "");
+                Integer count = hashTable.put(word, Integer.valueOf(1)); // Use the put method on the hash table instance to insert or update the word count
+                if (count == null) {
+                    // Word didn't exist previously, so the count is 1
+                } else {
+                    // Word already existed, update the count
+                    hashTable.put(word, count + 1);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if (fileReader != null) {
+                fileReader.close();
+            }
         }
     }
 
@@ -48,33 +76,6 @@ public class HashTable<K, V> implements MapInterface<K, V>, Iterable<MapEntry<K,
             else {
                 return entry.value;
             }
-        }
-    }
-
-    //function to insert a key value pair
-    public void insert(K key, V value){
-        int hash = (myhash(key)% TABLE_SIZE);
-        if (hashFunctionLevel == hashFunctionLevel.NAIVE){
-            hash = naiveHash(key);
-        }
-        else {
-            hash = sophisticatedHash(key);
-        }
-        if (table[hash]==null){
-            table[hash]=new MapEntry<>(key, value);
-        }
-        else {
-            MapEntry<K, V> entry = table[hash];
-            while (entry.next != null && !entry.key.equals(key)){
-                entry = entry.next;
-            }
-            if (entry.key.equals(key)){
-                entry.value = value;
-            }
-            else {
-                entry.next = new MapEntry<>(key, value);
-            }
-            size++;
         }
     }
 
@@ -139,30 +140,35 @@ public class HashTable<K, V> implements MapInterface<K, V>, Iterable<MapEntry<K,
     }
 
     @Override
-    public V put(K k, V v) {
-    // If an entry in this map with key k already exists then the value
-    // associated with that entry is replaced by value v and the original
-    // value is returned; otherwise, adds the (k, v) pair to the map and
-    // returns null.
-        if (k == null)
+    public V put(K key, V value) {
+        // If an entry in this map with key k already exists then the value
+        // associated with that entry is replaced by value v and the original
+        // value is returned; otherwise, adds the (k, v) pair to the map and
+        // returns null.
+        if (key == null)
             throw new IllegalArgumentException("Maps do not allow null keys.");
-        MapEntry<K, V> entry = new MapEntry<K, V>(k, v);
 
-        for(int i =0; i<TABLE_SIZE; i++){
-            MapEntry<K,V> temp = table[i];
-            if (temp!= null && temp.getKey().equals(k)){
-                table[i] = entry;//replace the existing entry
-                return temp.getValue(); //return the original value
-            }
+        int hash;
+        if (hashFunctionLevel == HashFunctionLevel.NAIVE) {
+            hash = naiveHash(key);
+        } else {
+            hash = sophisticatedHash(key);
         }
 
-        //no entry is associated with k, add the new entry to the table
-        for (int i =0; i<TABLE_SIZE; i++){
-            if (table[i] == null){
-                table[i] = entry;
-                break;
+        MapEntry<K, V> entry = table[hash];
+        while (entry != null) {
+            if (entry.key.equals(key)) {
+                V oldValue = entry.value;
+                entry.value = value;
+                return oldValue;
             }
+            entry = entry.next;
         }
+        //No entry found, create a new one
+        entry = new MapEntry<>(key, value);
+        entry.next = table[hash];
+        table[hash] = entry;
+        size++;
         return null;
     }
 
@@ -220,19 +226,21 @@ public class HashTable<K, V> implements MapInterface<K, V>, Iterable<MapEntry<K,
         }
 
         private void advanceToNextEntry() {
-            if (nextEntry != null && nextEntry.next != null) {
-                nextEntry = nextEntry.next;
-            } else {
-                currentIndex++;
-                while (currentIndex < TABLE_SIZE) {
-                    if (table[currentIndex] != null) {
-                        nextEntry = table[currentIndex];
-                        return;
-                    }
-                    currentIndex++;
-                }
-                nextEntry = null;
+            if (currentEntry != null && currentEntry.next != null) {
+                nextEntry = currentEntry.next;
+                return;
             }
+            //advance ot the next non-empty bucket
+            currentIndex++;
+            while (currentIndex < TABLE_SIZE) {
+                if (table[currentIndex] != null) {
+                    nextEntry = table[currentIndex];
+                    return;
+                }
+                currentIndex++;
+            }
+            //no more non-empty buckets, set nextEntry to null
+            nextEntry = null;
         }
     }
     @Override
