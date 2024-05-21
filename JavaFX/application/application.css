@@ -1,0 +1,15 @@
+/* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
+.root{
+	-fx-background-color: mediumblue;
+}
+.numButtons{
+	-fx-background-color: violet;
+	-fx-text-fill: seagreen;
+	-fx-font-size: 35px;
+}
+
+.output{
+	-fx-background-color: lightyellow;
+	-fx-font-size: 35px;
+	-fx-text-fill: dodgerblue;
+}
